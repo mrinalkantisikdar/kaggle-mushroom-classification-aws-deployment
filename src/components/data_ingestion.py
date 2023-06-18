@@ -17,8 +17,10 @@ from src.utils import connect_database
 
 @dataclass
 class DataIngestionconfig:      # put all the paths here, directory paths are in the form of string
-    train_data_path:str=os.path.join('artifacts','train.csv')
-    test_data_path:str=os.path.join('artifacts','test.csv')
+    X_train_data_path:str=os.path.join('artifacts','X_train.csv')
+    X_test_data_path:str=os.path.join('artifacts','X_test.csv')
+    y_train_data_path:str=os.path.join('artifacts','y_train.csv')
+    y_test_data_path:str=os.path.join('artifacts','y_test.csv')
     raw_data_path:str=os.path.join('artifacts','raw.csv')
 
 ## create a class for Data Ingestion
@@ -37,17 +39,23 @@ class DataIngestion:
             os.makedirs(os.path.dirname(self.ingestion_config.raw_data_path),exist_ok=True) # make directory, if already exists don't worry
             df.to_csv(self.ingestion_config.raw_data_path,index=False) # this file will be created
             logging.info('Train test split')
-            train_set,test_set=train_test_split(df,test_size=0.20,random_state=42) 
+            X=df.drop(labels=['classs'], axis=1)
+            y=df['classs']
+            X_train, X_test, y_train, y_test=train_test_split(X, y,test_size=0.20,random_state=42, stratify= y)
             # EDA is done before hand in notebooks, this is test train split
 
-            train_set.to_csv(self.ingestion_config.train_data_path,index=False,header=True)     # create train test data files
-            test_set.to_csv(self.ingestion_config.test_data_path,index=False,header=True)
+            X_train.to_csv(self.ingestion_config.X_train_data_path,index=False,header=True)     # create train test data files
+            X_test.to_csv(self.ingestion_config.X_test_data_path,index=False,header=True)
+            y_train.to_csv(self.ingestion_config.y_train_data_path,index=False,header=True)
+            y_test.to_csv(self.ingestion_config.y_test_data_path,index=False,header=True)
 
             logging.info('Ingestion of Data is completed')
 
             return(     # return train data & test data path
-                self.ingestion_config.train_data_path,
-                self.ingestion_config.test_data_path
+                self.ingestion_config.X_train_data_path,
+                self.ingestion_config.X_test_data_path,
+                self.ingestion_config.y_train_data_path,
+                self.ingestion_config.y_test_data_path
             )
   
             
@@ -59,10 +67,10 @@ class DataIngestion:
 '''
 if __name__=='__main__':
     obj=DataIngestion()
-    train_data_path, test_data_path=obj.initiate_data_ingestion()
+    X_train_data_path, X_test_data_path, y_train_data_path, y_test_data_path=obj.initiate_data_ingestion()
     data_transformation= DataTransformation()
-    train_arr, test_arr,_= data_transformation.initaite_data_transformation(train_data_path, test_data_path)
-
+    X_train_arr, X_test_arr, y_train_arr, y_test_arr,_= data_transformation.initaite_data_transformation(X_train_data_path, X_test_data_path, y_train_data_path, y_test_data_path)
 '''
+
 
 

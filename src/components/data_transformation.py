@@ -39,7 +39,7 @@ class DataTransformation:
                 "p": 0, 
                 "e": 1
                 }
-            df.loc[:,'classs'] = df['classs'].map(target_map)
+            df= df['classs'].map(target_map)
             return df
         except Exception as e:
             logging.info("Error in target encoding")
@@ -48,110 +48,61 @@ class DataTransformation:
 
     def get_data_transformation_object(self):
         try:
-            logging.info('Data Transformation initiated')
-
-
-            # Define categorical columns
 
             categorical_cols = ['cap_surface', 'bruises', 'gill_spacing', 'gill_size', 'gill_color',
-       'stalk_root', 'stalk_surface_above_ring', 'stalk_surface_below_ring',
-       'ring_type', 'spore_print_color', 'population', 'habitat'] # keeping only the important columns for our model
-          
-            
-                        
-            logging.info('Pipeline Initiated')
-            
+            'stalk_root', 'stalk_surface_above_ring', 'stalk_surface_below_ring',
+            'ring_type', 'spore_print_color', 'population', 'habitat'] # keeping only the important columns for our model
+
+
             # Categorigal Pipeline
             cat_pipeline=Pipeline(
                 steps=[
                 ('imputer',SimpleImputer(strategy='most_frequent')),
-                ('onehotencoder',OneHotEncoder(handle_unknown='ignore', drop= 'first', sparse_output= False)),
-                #('scaler',StandardScaler(with_mean=False))
+                ('onehotencoder',OneHotEncoder(handle_unknown='ignore', drop= 'first', sparse_output= True))
+                # no need to standardize after get dummies
                 ]
 
             )
             # combine target and catagorical pipeline
             preprocessor=ColumnTransformer([
-            #('tar_pipeline', tar_pipeline, target_col),
             ('cat_pipeline',cat_pipeline,categorical_cols)
             ], remainder ='passthrough', n_jobs=-1)
-            logging.info('Pipeline Completed')
             return preprocessor
-            
-            
 
         except Exception as e:
-            logging.info("Error in Data Trnasformation")
-            raise CustomException(e,sys)
+            raise e
         
-    def initaite_data_transformation(self,train_path,test_path):
+    def initaite_data_transformation(self,X_train_path,X_test_path, y_train_path,y_test_path):
         try:
             # Reading train and test data
-            train_df_pre = pd.read_csv(train_path)
-            test_df_pre = pd.read_csv(test_path)
+            X_train_df = pd.read_csv(X_train_path)
+            X_test_df = pd.read_csv(X_test_path)
+            y_train_df = pd.read_csv(y_train_path)
+            y_test_df = pd.read_csv(y_test_path)
 
             logging.info('Read train and test data completed')
-            logging.info(f'Train Dataframe Head : \n{train_df_pre.head().to_string()}')
-            logging.info(f'Test Dataframe Head  : \n{test_df_pre.head().to_string()}')
+            logging.info(f'X-Train Dataframe Head : \n{X_train_df.head().to_string()}')
+            logging.info(f'X-Test Dataframe Head  : \n{X_test_df.head().to_string()}')
+            logging.info(f'y-Train Dataframe Head : \n{y_train_df.head().to_string()}')
+            logging.info(f'y-Test Dataframe Head  : \n{y_test_df.head().to_string()}')
 
             logging.info('Obtaining preprocessing object')
 
-
-            #target_map_obj = self.target_encode()
             preprocessing_obj = self.get_data_transformation_object()
 
             # feature engineering
 
-            # Transforming dataframe using target_encode
-            train_df= self.target_encode(train_df_pre)
-            test_df= self.target_encode(test_df_pre)
-                                   
-            
-            #features_train = array(train_df.columns)
-            #features_test = array(test_df.columns)
-            target_column_name = 'classs'
-            drop_columns = [target_column_name, 'veil_type', 'cap_shape', 'cap_color', 'odor', 'gill_attachment', 
-                            'stalk_shape', 'stalk_color_above_ring', 'stalk_color_below_ring', 'ring_number', 'veil_color']
+            ## Trnasformating X using preprocessor obj
+            categorical_cols = ['cap_surface', 'bruises', 'gill_spacing', 'gill_size', 'gill_color',
+            'stalk_root', 'stalk_surface_above_ring', 'stalk_surface_below_ring',
+            'ring_type', 'spore_print_color', 'population', 'habitat'] # keeping only the important columns for our model
 
-            input_feature_train_df = train_df.drop(columns=drop_columns,axis=1)
-            target_feature_train_df=train_df[target_column_name]
+            X_train_arr=preprocessing_obj.fit_transform(X_train_df[categorical_cols])
+            X_test_arr=preprocessing_obj.transform(X_test_df[categorical_cols])
 
-            input_feature_test_df=test_df.drop(columns=drop_columns,axis=1)
-            target_feature_test_df=test_df[target_column_name]
-
-                  
-                      
-            
-            ## Trnasformating using preprocessor obj
-            input_feature_train_arr=preprocessing_obj.fit_transform(input_feature_train_df)
-            input_feature_test_arr=preprocessing_obj.transform(input_feature_test_df)
-
-            logging.info("Applying preprocessing object on training and testing datasets.")
-
-
-
-            #train_arr= np.r_[input_feature_train_arr, np.array(target_feature_train_df)]
-            #test_arr= np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
-            
-
-            train_arr_df = pd.concat([pd.DataFrame(input_feature_train_arr), pd.DataFrame(target_feature_train_df).reset_index().drop(['index'], axis=1)], axis=1, ignore_index= True, join= 'inner')
-            test_arr_df = pd.concat([pd.DataFrame(input_feature_test_arr), pd.DataFrame(target_feature_test_df).reset_index().drop(['index'], axis=1)], axis=1, ignore_index= True, join= 'inner')
-            train_arr= np.array(train_arr_df) # converting dataframe to numpy array
-            test_arr= np.array(test_arr_df)
-            #print(train_arr)
-
-            #train_arr= train_arr_df
-            #test_arr= test_arr_df
-
-            #X_train_arr= np.array(train_arr_df.iloc[:, :-1])
-            #y_train_arr= np.array(train_arr_df.iloc[:, -1])
-            #X_test_arr= np.array(test_arr_df.iloc[:, :-1])
-            #y_test_arr= np.array(test_arr_df.iloc[:, -1])
-            #train_arr= np.c_[X_train_arr, y_train_arr]
-            #test_arr= np.c_[X_test_arr, y_test_arr]
-
-
-
+            # Transforming y using target encode:
+            y_train_arr=self.target_encode(y_train_df)
+            y_test_arr=self.target_encode(y_test_df)
 
             # saving the pickle files
             save_object(
@@ -163,8 +114,10 @@ class DataTransformation:
             logging.info('Preprocessor pickle file saved')
 
             return (
-                train_arr,
-                test_arr,
+                X_train_arr,
+                X_test_arr,
+                y_train_arr,
+                y_test_arr,
                 self.data_transformation_config.preprocessor_obj_file_path,
             )
             

@@ -26,14 +26,14 @@ class ModelTrainer:
     def __init__(self):
         self.model_trainer_config = ModelTrainerConfig()
 
-    def initate_model_training(self,train_arr,test_arr):
+    def initate_model_training(self,X_train_arr,X_test_arr, y_train_arr,y_test_arr):
         try:
             logging.info('Splitting Dependent and Independent variables from train and test data')
-            X_train, y_train, X_test, y_test = (
-                train_arr[:,:-1].astype(int),
-                train_arr[:,-1].astype(int),
-                test_arr[:,:-1].astype(int),
-                test_arr[:,-1].astype(int)                 
+            X_train, X_test, y_train, y_test = (
+                X_train_arr[:,:],
+                X_test_arr[:,:],
+                y_train_arr,
+                y_test_arr                 
             
             )
 
