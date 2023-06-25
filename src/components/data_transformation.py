@@ -103,6 +103,8 @@ class DataTransformation:
             # Transforming y using target encode:
             y_train_arr=self.target_encode(y_train_df)
             y_test_arr=self.target_encode(y_test_df)
+            #y_train_arr= pd.get_dummies(y_train_df, drop_first= True)
+            #y_test_arr= pd.get_dummies(y_test_df, drop_first= True)
 
             # saving the pickle files
             save_object(
