@@ -14,7 +14,7 @@ Mushroom-Classification-iNeuron-Internship
 
 ### Application url
 
-http://mushroomclassificationtest-env.eba-jxp3wzij.eu-north-1.elasticbeanstalk.com/
+http://mushroomclassificationtest-env.eba-jxp3wzij.eu-north-1.elasticbeanstalk.com/predict
 
 
 ### Dataset url:
