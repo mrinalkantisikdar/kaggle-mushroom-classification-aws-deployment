@@ -12,6 +12,10 @@ pip install -r requirements.txt
 ```
 Mushroom-Classification-iNeuron-Internship
 
+### Application url
+
+http://mushroomclassificationtest-env.eba-jxp3wzij.eu-north-1.elasticbeanstalk.com/
+
 
 ### Dataset url:
 https://www.kaggle.com/datasets/uciml/mushroom-classification
